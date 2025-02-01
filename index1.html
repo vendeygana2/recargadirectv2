@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario y Tabla de Conversión</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            line-height: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+        .conversion-table {
+            background-color: #fff;
+            padding: 20px;
+            border: 5px solid #007BFF;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            position: relative;
+        }
+        .conversion-table h2 {
+            margin-bottom: 20px;
+        }
+        .toggle-button {
+            display: inline-block;
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, top 0.3s, left 0.3s;
+        }
+        .toggle-button.minimized {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) scale(1.25);
+            font-size: 12px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        .hidden {
+            display: none;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 0;
+            }
+            .container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                padding: 10px;
+                box-shadow: none;
+            }
+            .conversion-table {
+                border-width: 3px;
+                padding: 10px;
+            }
+            .toggle-button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="close-button" onclick="redirectToUrl()">X</button>
+        <div>
+            <!-- Formulario embebido de FluidForms -->
+            <iframe src="https://fluidforms.co/embed/form?id=679e428d316c268971c1eaaf" width="100%" height="500px" frameborder="0"></iframe>
+        </div>
+
+        <button class="toggle-button" id="toggleButton" onclick="toggleConversionTable()">CONVERSIÓN DE PESOS A BS EN RECARGA DIRECTV</button>
+
+        <div class="conversion-table" id="conversionTable">
+            <h2>Tabla de Conversión de Pesos a Bolívares - Recarga Directv</h2>
+            <div class="form-group">
+                <label for="monto">Ingrese aquí el Monto a Recargar en Pesos para ver el Monto a Pagar en BS:</label>
+                <input type="number" id="monto" name="monto" oninput="convertToBs()" required>
+                <span id="minRecargaMsg" class="error">Recarga Mínima 10 MIL Pesos</span>
+            </div>
+            <div class="form-group">
+                <label for="costo">Costo en BS:</label>
+                <input type="text" id="costo" name="costo" readonly>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const conversionTable = {
+            1000: 20.00,
+            2000: 40.00,
+            3000: 60.00,
+            4000: 80.00,
+            5000: 100.00,
+            6000: 120.00,
+            7000: 140.00,
+            8000: 160.00,
+            9000: 180.00,
+            10000: 207.00,
+            20000: 398.00,
+            30000: 590.00,
+            40000: 782.00,
+            50000: 973.00,
+            60000: 1165.00,
+            70000: 1360.00,
+            80000: 1550.00,
+            90000: 1750.00,
+            100000: 1950.00
+        };
+        let minRecarga = 10000; // Mínima recarga en pesos
+
+        // Función para convertir pesos a bolívares
+        function convertToBs() {
+            const monto = parseInt(document.getElementById('monto').value, 10);
+            const minRecargaMsg = document.getElementById('minRecargaMsg');
+            let costo = 0;
+
+            if (monto < minRecarga) {
+                minRecargaMsg.style.display = 'block';
+                document.getElementById('costo').value = '';
+                return;
+            } else {
+                minRecargaMsg.style.display = 'none';
+            }
+
+            // Descomponer el monto en múltiplos de 10,000 y 1,000
+            const multiplesDeDiezMil = Math.floor(monto / 10000) * 10000;
+            const multiplesDeMil = monto % 10000;
+
+            if (multiplesDeDiezMil in conversionTable) {
+                costo += conversionTable[multiplesDeDiezMil];
+            }
+            if (multiplesDeMil in conversionTable) {
+                costo += conversionTable[multiplesDeMil];
+            }
+
+            document.getElementById('costo').value = `${costo.toFixed(2)} BS`; // Mostrar en formato de 2 decimales
+        }
+
+        // Función para minimizar y maximizar la tabla de conversión
+        function toggleConversionTable() {
+            const conversionTable = document.getElementById('conversionTable');
+            const toggleButton = document.getElementById('toggleButton');
+
+            if (conversionTable.classList.contains('hidden')) {
+                conversionTable.classList.remove('hidden');
+                toggleButton.classList.remove('minimized');
+                toggleButton.textContent = 'MINIMIZAR CONVERSIÓN DE PESOS A BS EN RECARGA DIRECTV';
+            } else {
+                conversionTable.classList.add('hidden');
+                toggleButton.classList.add('minimized');
+                toggleButton.textContent = 'CONVERSIÓN DE PESOS A BS';
+            }
+        }
+
+        // Función para redirigir al enlace proporcionado
+        function redirectToUrl() {
+            window.location.href = 'https://www.vendeygana.net/user/';
+        }
+    </script>
+</body>
+</html>
